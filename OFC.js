@@ -3,7 +3,7 @@ const { Web3 } = require('web3');
 const axios = require('axios');
 
 const web3 = new Web3(process.env.INFURA_URL);
-const privateKey = process.env.PRIVATE_KEY;  
+const privateKey = process.env.PRIVATE_KEY;
 const account = web3.eth.accounts.privateKeyToAccount(privateKey);
 
 const headers = {
@@ -47,7 +47,7 @@ async function login() {
             { headers }
         );
 
-        console.log("🎉 Login berhasil!");
+        console.log("🎉 Login success!");
 
         return {
             token: authResponse.data.token,
@@ -67,7 +67,7 @@ async function genBearer(authToken) {
     }
 
     try {
-        console.log("🚀 Generating Bearer...");
+        console.log("🚀 Preparing...");
 
         const bearerHeader = {
             "content-type": "application/json",
@@ -84,7 +84,7 @@ async function genBearer(authToken) {
             throw new Error("Bearer token tidak ditemukan dalam respons API");
         }
 
-        console.log("🎁 Generated Bearer:");
+        console.log("🎁 Ready for claim the task !!!");
         return bearToken;
     } catch (error) {
         console.error("❌ Generate failed:", error.response ? error.response.data : error.message);
