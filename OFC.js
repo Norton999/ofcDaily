@@ -1,13 +1,14 @@
+require('dotenv').config();
 const { Web3 } = require('web3');
 const axios = require('axios');
 
-const web3 = new Web3('https://mainnet.infura.io/v3/d5d30a94dd2b4dcbb6ecd21a42f3b6d2');
-const privateKey = "0x5312835b5c631257b7b52bb08dfdf47b06026f6e1b46dd8f2164d11e6bd49ad2";  
+const web3 = new Web3(process.env.INFURA_URL);
+const privateKey = process.env.PRIVATE_KEY;  
 const account = web3.eth.accounts.privateKeyToAccount(privateKey);
 
 const headers = {
     "Content-Type": "application/json",
-    "privy-app-id": "clphlvsh3034xjw0fvs59mrdc",
+    "privy-app-id": process.env.PRIVY_APP_ID,
     "origin": "https://ofc.onefootball.com",
     "Referer": "https://ofc.onefootball.com/"
 };
@@ -17,7 +18,7 @@ async function login() {
         console.log("🔗 Address:", account.address);
 
         const initResponse = await axios.post(
-            "https://auth.privy.io/api/v1/siwe/init",
+            `${process.env.AUTH_API_URL}/siwe/init`,
             { address: account.address},
             { headers }
         );
@@ -35,7 +36,7 @@ async function login() {
         const { signature } = web3.eth.accounts.sign(message, privateKey);
 
         const authResponse = await axios.post(
-            "https://auth.privy.io/api/v1/siwe/authenticate",
+            `${process.env.AUTH_API_URL}/siwe/authenticate`,
             {
                 chainId: "eip155:1",
                 connectorType: "injected",
@@ -75,7 +76,7 @@ async function genBearer(authToken) {
 
         const payload = {"operationName":"UserLogin","variables":{"data":{"externalAuthToken":authToken}},"query":"mutation UserLogin($data: UserLoginInput!) {\n  userLogin(data: $data)\n}"};
         
-        const response = await axios.post("https://api.deform.cc/", payload, { headers: bearerHeader });
+        const response = await axios.post(process.env.API_URL, payload, { headers: bearerHeader });
 
         const bearToken = response.data?.data?.userLogin;
         
@@ -113,7 +114,7 @@ async function claimDaily(bearerToken, identityToken) {
 
         const payload = {"operationName":"VerifyActivity","variables":{"data":{"activityId":"c326c0bb-0f42-4ab7-8c5e-4a648259b807"}},"query":"mutation VerifyActivity($data: VerifyActivityInput!) {\n  verifyActivity(data: $data) {\n    record {\n      id\n      activityId\n      status\n      properties\n      createdAt\n      rewardRecords {\n        id\n        status\n        appliedRewardType\n        appliedRewardQuantity\n        appliedRewardMetadata\n        error\n        rewardId\n        reward {\n          id\n          quantity\n          type\n          properties\n          __typename\n        }\n        __typename\n      }\n      __typename\n    }\n    __typename\n  }\n}"};
 
-        const response = await axios.post("https://api.deform.cc/", payload, claimHeaders);
+        const response = await axios.post(process.env.API_URL, payload, claimHeaders);
         
         if (response.data.errors && response.data.errors.length > 0) {
             console.error("❌ Error:", response.data.errors[0].message);
